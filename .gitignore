@@ -5,8 +5,11 @@
 !LICENSE
 !/.gitignore
 !*.html
-!*.js
 !*.css
+!*.js
+!*.jsx
+!*.ts
+!*.tsx
 !*.go
 !go.mod
 

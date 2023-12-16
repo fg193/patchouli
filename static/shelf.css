@@ -1,0 +1,44 @@
+.shelf-name {
+	padding-top: 24px;
+}
+
+tr {
+	height: 32px;
+}
+
+td {
+	font-family: monospace;
+	border: 2px solid #dee2e6;
+	background-color: #f8f9fa;
+	min-width: 60px;
+	text-align: center;
+}
+
+td.l, td.c {
+	border-right: none;
+}
+
+td.r, td.c {
+	border-left: none;
+}
+
+td.t, td.m {
+	border-bottom: none;
+}
+
+td.b, td.m {
+	border-top: none;
+}
+
+td.a {
+	border-bottom: dotted #dee2e6;
+}
+
+td.d, td.w {
+	border: none;
+	background: none;
+}
+
+td.d {
+	border-bottom: double #aaa;
+}
