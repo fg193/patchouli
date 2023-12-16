@@ -1,0 +1,14 @@
+# Ignore everything
+*
+
+# But not these files...
+!LICENSE
+!/.gitignore
+!*.html
+!*.js
+!*.css
+!*.go
+!go.mod
+
+# ...even if they are in subdirectories
+!*/
