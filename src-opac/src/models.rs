@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchRequest {
-    pub engine: EngineId,
+    pub provider: ProviderId,
     pub query: String,
     pub page: Option<u32>,
     pub page_size: Option<u32>,
@@ -11,7 +11,7 @@ pub struct SearchRequest {
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
-pub enum EngineId {
+pub enum ProviderId {
     Douban,
     Clcn,
     Nlc,

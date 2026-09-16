@@ -5,14 +5,14 @@ use super::super::{
     error::ApiError,
     models::{optional_string, string_list, BookResult, SearchResponse},
 };
-use super::super::{EngineId, Provider};
+use super::super::{Provider, ProviderId};
 
 pub struct ClcnProvider;
 
 #[async_trait::async_trait]
 impl Provider for ClcnProvider {
-    fn engine(&self) -> EngineId {
-        EngineId::Clcn
+    fn provider(&self) -> ProviderId {
+        ProviderId::Clcn
     }
     async fn search(
         &self,
@@ -68,7 +68,7 @@ pub async fn search(
         .send()
         .await?;
     if !response.status().is_success() {
-        return Err(ApiError::upstream("首都图书馆", response.status()));
+        return Err(ApiError::http(response.status()));
     }
     let payload: Value = response.json().await?;
     let data = payload.get("data").unwrap_or(&payload);
@@ -77,9 +77,7 @@ pub async fn search(
         .or_else(|| data.get("list"))
         .or_else(|| data.get("content"))
         .and_then(Value::as_array)
-        .ok_or(ApiError::InvalidResponse {
-            provider: "首都图书馆",
-        })?;
+        .ok_or_else(|| ApiError::invalid_response(&payload))?;
     let items = rows
         .iter()
         .enumerate()

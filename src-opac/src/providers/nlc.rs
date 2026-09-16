@@ -4,14 +4,14 @@ use super::super::{
     error::ApiError,
     models::{optional_string, string_list, BookResult, SearchResponse},
 };
-use super::super::{EngineId, Provider};
+use super::super::{Provider, ProviderId};
 
 pub struct NlcProvider;
 
 #[async_trait::async_trait]
 impl Provider for NlcProvider {
-    fn engine(&self) -> EngineId {
-        EngineId::Nlc
+    fn provider(&self) -> ProviderId {
+        ProviderId::Nlc
     }
     async fn search(
         &self,
@@ -94,16 +94,20 @@ pub async fn search(
         .send()
         .await?;
     if !response.status().is_success() {
-        return Err(ApiError::upstream("国家图书馆", response.status()));
+        return Err(ApiError::http(response.status()));
     }
     let payload: Value = response.json().await?;
+    if let Some(code) = payload.get("code").and_then(Value::as_u64) {
+        if code != 200 {
+            let message = optional_string(&payload, &["msg"]).unwrap_or_default();
+            return Err(ApiError::Business { code, message });
+        }
+    }
     let data = payload.get("data").unwrap_or(&payload);
     let books = data
         .get("content")
         .and_then(Value::as_array)
-        .ok_or(ApiError::InvalidResponse {
-            provider: "国家图书馆",
-        })?;
+        .ok_or_else(|| ApiError::invalid_response(&payload))?;
     let items = books
         .iter()
         .enumerate()

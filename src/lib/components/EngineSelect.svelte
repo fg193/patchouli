@@ -1,19 +1,17 @@
 <script lang="ts">
-  import { SEARCH_ENGINES, type SearchEngine } from "../api/engines";
-  import type { EngineId } from "../api/contracts";
+  import { getProvider, PROVIDERS, type Provider } from "../api/providers";
+  import type { ProviderId } from "../api/contracts";
 
   let {
     value,
     onchange,
-  }: { value: EngineId; onchange: (id: EngineId) => void } = $props();
+  }: { value: ProviderId; onchange: (id: ProviderId) => void } = $props();
   let open = $state(false);
 
-  const current = $derived(
-    SEARCH_ENGINES.find((engine) => engine.id === value) ?? SEARCH_ENGINES[0],
-  );
+  const current = $derived(getProvider(value));
 
-  function select(engine: SearchEngine) {
-    onchange(engine.id);
+  function select(provider: Provider) {
+    onchange(provider.id);
     open = false;
   }
 </script>
@@ -42,22 +40,22 @@
     ></button>
     <div class="engine-menu" role="listbox" aria-label="选择搜索引擎">
       <p class="menu-label">检索来源</p>
-      {#each SEARCH_ENGINES as engine}
+      {#each PROVIDERS as provider}
         <button
           type="button"
           role="option"
-          aria-selected={engine.id === value}
-          class:active={engine.id === value}
-          onclick={() => select(engine)}
+          aria-selected={provider.id === value}
+          class:active={provider.id === value}
+          onclick={() => select(provider)}
         >
-          <span class="option-mark" style={`--engine-color:${engine.accent}`}
-            >{engine.shortName.slice(0, 1)}</span
+          <span class="option-mark" style={`--engine-color:${provider.accent}`}
+            >{provider.shortName.slice(0, 1)}</span
           >
           <span>
-            <strong>{engine.name}</strong>
-            <small>{engine.description}</small>
+            <strong>{provider.name}</strong>
+            <small>{provider.description}</small>
           </span>
-          {#if engine.id === value}<span class="check">✓</span>{/if}
+          {#if provider.id === value}<span class="check">✓</span>{/if}
         </button>
       {/each}
     </div>

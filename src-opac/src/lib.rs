@@ -4,7 +4,7 @@ pub mod providers;
 
 #[async_trait::async_trait]
 pub trait Provider: Send + Sync {
-    fn engine(&self) -> EngineId;
+    fn provider(&self) -> ProviderId;
     async fn search(
         &self,
         client: &reqwest::Client,
@@ -45,7 +45,7 @@ impl Opac {
             .build()?;
         self.providers
             .iter()
-            .find(|p| p.engine() == request.engine)
+            .find(|p| p.provider() == request.provider)
             .ok_or(ApiError::invalid_request("不支持的检索引擎"))?
             .search(&client, query, page, page_size)
             .await
@@ -53,4 +53,4 @@ impl Opac {
 }
 
 pub use error::ApiError;
-pub use models::{BookResult, EngineId, SearchRequest, SearchResponse};
+pub use models::{BookResult, ProviderId, SearchRequest, SearchResponse};

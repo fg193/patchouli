@@ -1,7 +1,7 @@
-export type EngineId = "douban" | "clcn" | "nlc";
+export type ProviderId = "douban" | "clcn" | "nlc";
 
 export interface SearchRequest {
-  engine: EngineId;
+  provider: ProviderId;
   query: string;
   page?: number;
   pageSize?: number;
@@ -19,7 +19,7 @@ export interface BookResult {
   summary?: string;
   rating?: number;
   detailUrl?: string;
-  source: EngineId;
+  source: ProviderId;
 }
 
 export interface SearchResponse {
@@ -32,4 +32,6 @@ export interface SearchResponse {
 export interface ApiFailure {
   code: string;
   message: string;
+  businessCode?: number;
+  response?: string;
 }

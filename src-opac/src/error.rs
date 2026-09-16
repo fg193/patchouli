@@ -5,12 +5,14 @@ use thiserror::Error;
 pub enum ApiError {
     #[error("{message}")]
     InvalidRequest { message: String },
-    #[error("{provider} 暂时无法访问（HTTP {status}）")]
-    Upstream { provider: &'static str, status: u16 },
+    #[error("HTTP {status}")]
+    Http { status: u16 },
     #[error("网络请求失败：{0}")]
     Network(#[from] reqwest::Error),
-    #[error("{provider} 返回了无法识别的数据")]
-    InvalidResponse { provider: &'static str },
+    #[error("无法解析查询结果：{response}")]
+    InvalidResponse { response: String },
+    #[error("{message}")]
+    Business { code: u64, message: String },
 }
 
 impl ApiError {
@@ -20,10 +22,15 @@ impl ApiError {
         }
     }
 
-    pub fn upstream(provider: &'static str, status: reqwest::StatusCode) -> Self {
-        Self::Upstream {
-            provider,
+    pub fn http(status: reqwest::StatusCode) -> Self {
+        Self::Http {
             status: status.as_u16(),
+        }
+    }
+
+    pub fn invalid_response(response: &serde_json::Value) -> Self {
+        Self::InvalidResponse {
+            response: response.to_string(),
         }
     }
 }
@@ -36,13 +43,24 @@ impl Serialize for ApiError {
         use serde::ser::SerializeStruct;
         let code = match self {
             Self::InvalidRequest { .. } => "INVALID_REQUEST",
-            Self::Upstream { .. } => "UPSTREAM_ERROR",
+            Self::Http { .. } => "HTTP_ERROR",
             Self::Network(_) => "NETWORK_ERROR",
             Self::InvalidResponse { .. } => "INVALID_RESPONSE",
+            Self::Business { .. } => "BUSINESS_ERROR",
         };
         let mut state = serializer.serialize_struct("ApiError", 2)?;
         state.serialize_field("code", code)?;
         state.serialize_field("message", &self.to_string())?;
+        if let Self::InvalidResponse { response } = self {
+            state.serialize_field("response", response)?;
+        }
+        if let Self::Business {
+            code: business_code,
+            ..
+        } = self
+        {
+            state.serialize_field("businessCode", business_code)?;
+        }
         state.end()
     }
 }

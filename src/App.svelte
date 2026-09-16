@@ -2,18 +2,22 @@
   import BookCard from "./lib/components/BookCard.svelte";
   import EngineSelect from "./lib/components/EngineSelect.svelte";
   import { tauriSearchApi } from "./lib/api/client";
-  import { getEngine } from "./lib/api/engines";
-  import type { ApiFailure, BookResult, EngineId } from "./lib/api/contracts";
+  import { getProvider } from "./lib/api/providers";
+  import type { ApiFailure, BookResult, ProviderId } from "./lib/api/contracts";
 
-  let engine = $state<EngineId>("douban");
+  let provider = $state<ProviderId>("douban");
+  let resultProvider = $state<ProviderId>("douban");
   let query = $state("");
   let results = $state<BookResult[]>([]);
   let total = $state(0);
   let loading = $state(false);
   let error = $state("");
+  let businessCode = $state<number | undefined>(undefined);
+  let errorMessage = $state("");
   let hasSearched = $state(false);
 
-  const selectedEngine = $derived(getEngine(engine));
+  const selectedProvider = $derived(getProvider(provider));
+  const resultSource = $derived(getProvider(resultProvider));
 
   async function search() {
     const normalized = query.trim();
@@ -21,10 +25,13 @@
 
     loading = true;
     error = "";
+    businessCode = undefined;
+    errorMessage = "";
     hasSearched = true;
+    resultProvider = provider;
     try {
       const response = await tauriSearchApi.search({
-        engine,
+        provider,
         query: normalized,
         page: 1,
         pageSize: 20,
@@ -33,10 +40,19 @@
       total = response.total;
     } catch (cause) {
       const failure = cause as Partial<ApiFailure> | string;
-      error =
+      const message =
         typeof failure === "string"
           ? failure
           : (failure.message ?? "检索暂时不可用，请稍后再试。");
+      businessCode =
+        typeof failure === "string" ? undefined : failure.businessCode;
+      errorMessage = message;
+      error =
+        typeof failure === "string" ||
+        !failure.code ||
+        failure.code === "NETWORK_ERROR"
+          ? message
+          : `${resultSource.name}：${message}`;
       results = [];
       total = 0;
     } finally {
@@ -48,7 +64,7 @@
 <svelte:head
   ><title
     >{hasSearched
-      ? `${query} · ${selectedEngine.shortName}`
+      ? `${query} · ${selectedProvider.shortName}`
       : "页间 · 图书检索"}</title
   ></svelte:head
 >
@@ -75,13 +91,11 @@
         search();
       }}
     >
-      <EngineSelect value={engine} onchange={(id) => (engine = id)} />
+      <EngineSelect value={provider} onchange={(id) => (provider = id)} />
       <input
         bind:value={query}
         aria-label="搜索关键词"
-        placeholder={engine === "clcn"
-          ? "在首图按作者检索"
-          : `在${selectedEngine.shortName}搜索书名、作者或 ISBN`}
+        placeholder={selectedProvider.placeholder}
         autocomplete="off"
       />
       <button
@@ -105,13 +119,14 @@
       {#if loading}
         <div class="status">
           <span class="large-spinner"></span>
-          <p>正在翻阅 {selectedEngine.name}…</p>
+          <p>少女祈祷中…</p>
         </div>
       {:else if error}
         <div class="status error-state">
           <span>!</span>
           <h2>这一页暂时翻不开</h2>
-          <p>{error}</p>
+          {#if businessCode !== undefined}<p>错误码：{businessCode}</p>{/if}
+          <p>错误消息：{errorMessage || error}</p>
           <button type="button" onclick={search}>重新检索</button>
         </div>
       {:else if results.length === 0}
@@ -123,7 +138,7 @@
       {:else}
         <div class="result-heading">
           <p>
-            <span>{selectedEngine.shortName}</span> 找到约 {total.toLocaleString(
+            在<span>{resultSource.shortName}</span>找到 {total.toLocaleString(
               "zh-CN",
             )} 条结果
           </p>

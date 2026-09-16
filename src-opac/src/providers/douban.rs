@@ -4,14 +4,14 @@ use super::super::{
     error::ApiError,
     models::{optional_string, string_list, BookResult, SearchResponse},
 };
-use super::super::{EngineId, Provider};
+use super::super::{Provider, ProviderId};
 
 pub struct DoubanProvider;
 
 #[async_trait::async_trait]
 impl Provider for DoubanProvider {
-    fn engine(&self) -> EngineId {
-        EngineId::Douban
+    fn provider(&self) -> ProviderId {
+        ProviderId::Douban
     }
     async fn search(
         &self,
@@ -45,13 +45,13 @@ pub async fn search(
         .send()
         .await?;
     if !response.status().is_success() {
-        return Err(ApiError::upstream("豆瓣", response.status()));
+        return Err(ApiError::http(response.status()));
     }
     let payload: Value = response.json().await?;
     let books = payload
         .get("books")
         .and_then(Value::as_array)
-        .ok_or(ApiError::InvalidResponse { provider: "豆瓣" })?;
+        .ok_or_else(|| ApiError::invalid_response(&payload))?;
     let items = books
         .iter()
         .enumerate()
