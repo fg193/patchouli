@@ -2,6 +2,20 @@ mod error;
 mod models;
 pub mod providers;
 
+fn tls_config() -> rustls::ClientConfig {
+    let roots = rustls::RootCertStore {
+        roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
+    };
+
+    rustls::ClientConfig::builder_with_provider(std::sync::Arc::new(
+        rustls::crypto::ring::default_provider(),
+    ))
+    .with_safe_default_protocol_versions()
+    .expect("ring supports rustls' default protocol versions")
+    .with_root_certificates(roots)
+    .with_no_client_auth()
+}
+
 #[async_trait::async_trait]
 pub trait Provider: Send + Sync {
     fn provider(&self) -> ProviderId;
@@ -40,6 +54,7 @@ impl Opac {
         let page = request.page.unwrap_or(1).max(1);
         let page_size = request.page_size.unwrap_or(20).clamp(1, 50);
         let client = reqwest::Client::builder()
+            .tls_backend_preconfigured(tls_config())
             .user_agent("Patchouli/0.1 (desktop library search)")
             .timeout(std::time::Duration::from_secs(20))
             .build()?;
