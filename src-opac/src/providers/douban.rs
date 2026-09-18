@@ -61,7 +61,8 @@ pub async fn search(
             let rating = book
                 .get("rating")
                 .and_then(|rating| rating.get("average"))
-                .and_then(|average| average.as_f64().or_else(|| average.as_str()?.parse().ok()));
+                .and_then(|average| average.as_f64().or_else(|| average.as_str()?.parse().ok()))
+                .filter(|average| *average != 0.0);
             BookResult {
                 id,
                 title: optional_string(book, &["title"]).unwrap_or_else(|| "未命名书目".into()),
