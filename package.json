@@ -4,12 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check": "npm run check:ts && npm run check:rs",
+    "check:ts": "svelte-check --tsconfig ./tsconfig.json",
+    "check:rs": "cargo check --manifest-path src-opac/Cargo.toml",
     "format": "npm run format:ts && npm run format:rs",
     "format:ts": "prettier --write \"src/**/*.{ts,svelte,css}\" \"*.json\" \"src-tauri/*.json\"",
     "format:rs": "cargo fmt --manifest-path src-opac/Cargo.toml && cargo fmt --manifest-path src-tauri/Cargo.toml"
   },
   "dependencies": {
+    "@lucide/svelte": "^1.47.0",
     "@tauri-apps/api": "^2.11.1",
     "svelte": "^5.56.4"
   },

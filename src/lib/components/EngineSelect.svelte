@@ -1,14 +1,28 @@
 <script lang="ts">
   import { getProvider, PROVIDERS, type Provider } from "../api/providers";
   import type { ProviderId } from "../api/contracts";
+  import { ChevronDown } from "@lucide/svelte";
 
   let {
     value,
     onchange,
   }: { value: ProviderId; onchange: (id: ProviderId) => void } = $props();
   let open = $state(false);
+  let container: HTMLDivElement;
 
   const current = $derived(getProvider(value));
+
+  $effect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (open && container && !container.contains(event.target as Node)) {
+        open = false;
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+  });
 
   function select(provider: Provider) {
     onchange(provider.id);
@@ -16,7 +30,7 @@
   }
 </script>
 
-<div class="engine-select">
+<div class="engine-select" bind:this={container}>
   <button
     class="engine-trigger"
     type="button"
@@ -25,19 +39,11 @@
     aria-expanded={open}
     onclick={() => (open = !open)}
   >
-    <span class="engine-mark" style={`--engine-color:${current.accent}`}
-      >{current.shortName.slice(0, 1)}</span
-    >
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+    <span class="engine-mark">{current.shortName}</span>
+    <ChevronDown aria-hidden="true" />
   </button>
 
   {#if open}
-    <button
-      class="dismiss"
-      type="button"
-      aria-label="关闭搜索引擎菜单"
-      onclick={() => (open = false)}
-    ></button>
     <div class="engine-menu" role="listbox" aria-label="选择搜索引擎">
       <p class="menu-label">检索来源</p>
       {#each PROVIDERS as provider}
@@ -67,9 +73,11 @@
     position: relative;
     align-self: stretch;
     display: flex;
+    flex: 0 0 auto;
   }
   .engine-trigger {
-    width: 84px;
+    width: 68px;
+    flex: 0 0 68px;
     border: 0;
     border-right: 1px solid var(--line);
     background: transparent;
@@ -82,7 +90,7 @@
   .engine-trigger:hover {
     background: rgba(43, 48, 43, 0.04);
   }
-  .engine-trigger svg {
+  .engine-trigger :global(svg) {
     width: 14px;
     fill: none;
     stroke: #77766e;
@@ -92,22 +100,16 @@
   .option-mark {
     display: grid;
     place-items: center;
-    color: white;
-    background: var(--engine-color);
     font-family: var(--serif);
   }
   .engine-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    font-size: 14px;
+    color: var(--ink);
+    font-size: 13px;
+    white-space: nowrap;
   }
-  .dismiss {
-    position: fixed;
-    inset: 0;
-    z-index: 4;
-    border: 0;
-    background: transparent;
+  .option-mark {
+    color: white;
+    background: var(--engine-color);
   }
   .engine-menu {
     position: absolute;

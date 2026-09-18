@@ -20,6 +20,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  touch-action: manipulation;
   background:
     radial-gradient(
       circle at 14% 8%,
@@ -64,7 +65,7 @@ header {
   height: 88px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   border-bottom: 1px solid rgba(93, 92, 82, 0.14);
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(8px);
@@ -73,6 +74,102 @@ header {
 
 header.hidden {
   transform: translateY(-100%);
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--paper-dark);
+}
+
+.icon-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.icon-button svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.header-search {
+  width: min(440px, 100%);
+  min-width: 0;
+  min-height: 0;
+  max-height: 42px;
+  height: 42px;
+  flex: 0 1 440px;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.header-search input {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.header-search .engine-trigger {
+  width: 68px;
+  gap: 4px;
+}
+
+.header-search .engine-mark {
+  width: 26px;
+  height: 26px;
+}
+
+.search-submit {
+  width: 36px;
+  flex: 0 0 36px;
+  margin: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.search-submit:hover:not(:disabled) {
+  background: var(--paper-dark);
+}
+
+.search-submit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.search-submit svg {
+  width: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 3px;
 }
 
 .brand {
@@ -154,6 +251,12 @@ h1 em {
   transition:
     box-shadow 0.2s,
     border-color 0.2s;
+}
+
+/* The header has its own compact search box; keep this override after the base rule. */
+.header-search {
+  height: 46px;
+  margin-top: 0;
 }
 
 .search-box:focus-within {
@@ -336,18 +439,6 @@ h1 em {
   cursor: pointer;
 }
 
-footer {
-  margin-top: auto;
-  height: 68px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba(93, 92, 82, 0.14);
-  color: #9a998f;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -361,7 +452,25 @@ footer {
 
   header {
     height: 72px;
-    padding: 0 14px;
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .header-search {
+    width: auto;
+    max-height: 42px;
+    height: 42px;
+    flex: 1 1 auto;
+    margin: 0 2px;
+  }
+
+  .header-actions {
+    gap: 0;
+  }
+
+  .icon-button {
+    width: 36px;
+    flex-basis: 36px;
   }
 
   .hero,
@@ -381,6 +490,11 @@ footer {
   .search-box {
     height: 62px;
     margin-top: 32px;
+  }
+
+  .header-search.search-box {
+    height: 42px;
+    margin-top: 0;
   }
 
   .search-button {

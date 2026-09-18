@@ -2,6 +2,7 @@
   import BookCard from "./lib/components/BookCard.svelte";
   import EngineSelect from "./lib/components/EngineSelect.svelte";
   import LoadingIndicator from "./lib/components/LoadingIndicator.svelte";
+  import { ClipboardList, Menu, ScanBarcode, Search } from "@lucide/svelte";
   import { tauriSearchApi } from "./lib/api/client";
   import { getProvider } from "./lib/api/providers";
   import type { ApiFailure, BookResult, ProviderId } from "./lib/api/contracts";
@@ -21,11 +22,23 @@
   let businessCode = $state<number | undefined>(undefined);
   let errorMessage = $state("");
   let hasSearched = $state(false);
+  let route = $state<"home" | "search">("home");
   let headerVisible = $state(true);
 
   const selectedProvider = $derived(getProvider(provider));
   const resultSource = $derived(getProvider(resultProvider));
   const hasMore = $derived(results.length < total);
+
+  $effect(() => {
+    const updateRoute = () => {
+      route = window.location.hash.startsWith("#/search") ? "search" : "home";
+      hasSearched = route === "search";
+    };
+
+    updateRoute();
+    window.addEventListener("hashchange", updateRoute);
+    return () => window.removeEventListener("hashchange", updateRoute);
+  });
 
   $effect(() => {
     let lastScrollY = window.scrollY;
@@ -75,6 +88,7 @@
     errorMessage = "";
     hasSearched = true;
     resultProvider = provider;
+    if (window.location.hash !== "#/search") window.location.hash = "/search";
     try {
       const response = await tauriSearchApi.search({
         provider,
@@ -143,22 +157,14 @@
   ></svelte:head
 >
 
-<main class:searched={hasSearched}>
+<main class:searched={route === "search"}>
   <header class:hidden={!headerVisible}>
-    <a class="brand" href="/" aria-label="Patchouli 首页">
-      <span>Patchouli</span>
-    </a>
-  </header>
-
-  <section class="hero" aria-labelledby="page-title">
-    <div class="eyebrow"><span></span>在千万册书中，找到那一页</div>
-    <h1 id="page-title">从一处开始，<em>寻遍群书。</em></h1>
-    <p class="intro">
-      聚合豆瓣、首都图书馆与国家图书馆馆藏，一次检索，少一点辗转。
-    </p>
-
+    <button class="icon-button menu-button" type="button" aria-label="打开菜单">
+      <Menu aria-hidden="true" />
+    </button>
     <form
-      class="search-box"
+      id="search-form"
+      class="search-box header-search"
       onsubmit={(event) => {
         event.preventDefault();
         search();
@@ -172,22 +178,37 @@
         autocomplete="off"
       />
       <button
-        class="search-button"
+        class="search-submit"
         type="submit"
         disabled={!query.trim() || loading}
         aria-label="搜索"
       >
-        {#if loading}<span class="spinner"></span>{:else}<svg
-            viewBox="0 0 24 24"
+        {#if loading}<span class="spinner"></span>{:else}<Search
             aria-hidden="true"
-            ><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg
-          >{/if}
-        <span>检索</span>
+          />{/if}
       </button>
     </form>
-  </section>
+    <nav class="header-actions" aria-label="快捷操作">
+      <button class="icon-button" type="button" aria-label="扫码">
+        <ScanBarcode aria-hidden="true" />
+      </button>
+      <button class="icon-button" type="button" aria-label="书单">
+        <ClipboardList aria-hidden="true" />
+      </button>
+    </nav>
+  </header>
 
-  {#if hasSearched}
+  {#if route === "home"}
+    <section class="hero" aria-labelledby="page-title">
+      <div class="eyebrow"><span></span>在千万册书中，找到那一页</div>
+      <h1 id="page-title">从一处开始，<em>寻遍群书。</em></h1>
+      <p class="intro">
+        聚合豆瓣、首都图书馆与国家图书馆馆藏，一次检索，少一点辗转。
+      </p>
+    </section>
+  {/if}
+
+  {#if route === "search"}
     <section class="results" aria-live="polite">
       {#if loading}
         <div class="status">
@@ -235,6 +256,4 @@
       {/if}
     </section>
   {/if}
-
-  <footer><span>Patchouli</span><span>跨馆检索，不止于搜索</span></footer>
 </main>
