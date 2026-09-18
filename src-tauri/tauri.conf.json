@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "io.github.fg193.patchouli",
   "build": {
-    "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build && tauri icon src-tauri/app-icon.svg",
+    "beforeDevCommand": "vite",
+    "beforeBuildCommand": "vite build && tauri icon src-tauri/app-icon.svg",
     "frontendDist": "../dist"
   },
   "app": {

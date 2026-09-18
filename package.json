@@ -4,13 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "format": "npm run format:ts && npm run format:rs",
     "format:ts": "prettier --write \"src/**/*.{ts,svelte,css}\" \"*.json\" \"src-tauri/*.json\"",
-    "format:rs": "cargo fmt --manifest-path src-opac/Cargo.toml && cargo fmt --manifest-path src-tauri/Cargo.toml",
-    "tauri": "tauri"
+    "format:rs": "cargo fmt --manifest-path src-opac/Cargo.toml && cargo fmt --manifest-path src-tauri/Cargo.toml"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",

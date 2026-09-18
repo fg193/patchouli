@@ -39,14 +39,14 @@ cargo test --manifest-path src-opac/Cargo.toml
 
 ```bash
 npm install
-npm run tauri dev
+npx tauri dev
 ```
 
 构建 Tauri 应用，以 Android 平台为例：
 
 ```bash
-npm run tauri android init
-npm run tauri android build -- --apk --split-per-abi --target aarch64
+npx tauri android init
+npx tauri android build -- --apk --split-per-abi --target aarch64
 ```
 
 修改代码后，需保证代码正确格式化：
