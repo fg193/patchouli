@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { BookResult } from "../api/contracts";
+  import { ClipboardPlus } from "@lucide/svelte";
   let { book, index }: { book: BookResult; index: number } = $props();
   let imageFailed = $state(false);
 </script>
@@ -44,17 +45,15 @@
       {#if book.publicationDate}<span>·</span>{book.publicationDate}{/if}
     </p>
     {#if book.summary}<p class="summary">{book.summary}</p>{/if}
-    {#if book.documentType || book.classmark || book.detailUrl}<div
-        class="meta"
-      >
-        {#if book.documentType}<span>{book.documentType}</span>{/if}
-        {#if book.classmark}<span>{book.classmark}</span>{/if}
-        {#if book.detailUrl}<a
-            href={book.detailUrl}
-            target="_blank"
-            rel="noreferrer">查看详情 ↗</a
-          >{/if}
-      </div>{/if}
+    <div class="meta-row">
+      {#if book.documentType || book.classmark}<div class="meta">
+          {#if book.documentType}<span>{book.documentType}</span>{/if}
+          {#if book.classmark}<span>{book.classmark}</span>{/if}
+        </div>{/if}
+      <button class="add-to-wishlist" type="button" aria-label={`将《${book.title}》加入书单`}>
+        <ClipboardPlus aria-hidden="true" />
+      </button>
+    </div>
   </div>
 </article>
 
@@ -147,6 +146,12 @@
     display: flex;
     gap: 9px;
     align-items: center;
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 28px;
     margin-top: 15px;
   }
   .meta span {
@@ -156,11 +161,22 @@
     color: var(--muted);
     font-size: 10px;
   }
-  .meta a {
+  .add-to-wishlist {
+    display: inline-grid;
+    place-items: center;
     margin-left: auto;
+    padding: 4px;
+    border: 0;
+    background: transparent;
     color: var(--green);
-    font-size: 12px;
-    text-decoration: none;
+    cursor: pointer;
+  }
+  .add-to-wishlist:hover {
+    color: var(--ink);
+  }
+  .add-to-wishlist :global(svg) {
+    width: 20px;
+    height: 20px;
   }
   @keyframes rise {
     from {
