@@ -34,7 +34,7 @@ fn search_params(query: &str, page: u32, page_size: u32) -> Vec<(&'static str, S
     let start = (page - 1) * page_size + 1;
     vec![
         ("query", query.to_owned()),
-        ("find_type", "creator".into()),
+        ("find_type", "title".into()),
         ("start", start.to_string()),
         ("length", page_size.to_string()),
         ("facettype", String::new()),
@@ -123,11 +123,12 @@ mod tests {
 
     #[test]
     fn includes_required_empty_filters_and_one_based_start() {
+        const BOOK_TITLE: &str = "Designing Data-Intensive Applications";
         assert_eq!(
-            search_params("Donna Wheeler", 1, 9),
+            search_params(BOOK_TITLE, 1, 9),
             vec![
-                ("query", "Donna Wheeler".into()),
-                ("find_type", "creator".into()),
+                ("query", BOOK_TITLE.into()),
+                ("find_type", "title".into()),
                 ("start", "1".into()),
                 ("length", "9".into()),
                 ("facettype", String::new()),
