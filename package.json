@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
+    "format": "npm run format:ts && npm run format:rs",
+    "format:ts": "prettier --write \"src/**/*.{ts,svelte,css}\" \"*.json\" \"src-tauri/*.json\"",
+    "format:rs": "cargo fmt --manifest-path src-opac/Cargo.toml && cargo fmt --manifest-path src-tauri/Cargo.toml",
     "tauri": "tauri"
   },
   "dependencies": {
@@ -16,6 +19,8 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tauri-apps/cli": "^2.8.4",
+    "prettier": "^3.9.8",
+    "prettier-plugin-svelte": "^4.1.1",
     "svelte-check": "^4.3.2",
     "typescript": "^5.9.2",
     "vite": "^8.0.0"

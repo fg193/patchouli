@@ -48,3 +48,9 @@ npm run tauri dev
 npm run tauri android init
 npm run tauri android build -- --apk --split-per-abi --target aarch64
 ```
+
+修改代码后，需保证代码正确格式化：
+
+```bash
+npm run format
+```
