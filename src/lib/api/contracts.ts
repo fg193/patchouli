@@ -10,16 +10,18 @@ export interface SearchRequest {
 export interface BookResult {
   id: string;
   title: string;
-  subtitle?: string;
+  subtitles: string[];
+  documentType?: string;
+  classmark?: string;
   authors: string[];
   publisher?: string;
-  publishedAt?: string;
+  publicationDate?: string;
   coverUrl?: string;
   isbn?: string;
   summary?: string;
   rating?: number;
   detailUrl?: string;
-  source: ProviderId;
+  providerId: ProviderId;
 }
 
 export interface SearchResponse {

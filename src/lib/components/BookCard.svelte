@@ -1,12 +1,18 @@
 <script lang="ts">
   import type { BookResult } from "../api/contracts";
   let { book, index }: { book: BookResult; index: number } = $props();
+  let imageFailed = $state(false);
 </script>
 
 <article class="book" style={`--delay:${Math.min(index, 8) * 45}ms`}>
   <div class="cover">
-    {#if book.coverUrl}
-      <img src={book.coverUrl} alt={`${book.title}封面`} loading="lazy" />
+    {#if book.coverUrl && !imageFailed}
+      <img
+        src={book.coverUrl}
+        alt={`${book.title}封面`}
+        loading="lazy"
+        onerror={() => (imageFailed = true)}
+      />
     {:else}
       <span>{book.title.slice(0, 1)}</span>
     {/if}
@@ -14,8 +20,19 @@
   <div class="content">
     <div class="title-line">
       <div>
-        <h2>{book.title}</h2>
-        {#if book.subtitle}<p class="subtitle">{book.subtitle}</p>{/if}
+        {#if book.detailUrl}
+          <a
+            class="title-link"
+            href={book.detailUrl}
+            target="_blank"
+            rel="noreferrer"><h2>{book.title}</h2></a
+          >
+        {:else}
+          <h2>{book.title}</h2>
+        {/if}
+        {#each book.subtitles as subtitle}<p class="subtitle">
+            {subtitle}
+          </p>{/each}
       </div>
       {#if book.rating !== undefined}<span class="rating"
           >★ {book.rating.toFixed(1)}</span
@@ -24,24 +41,20 @@
     <p class="byline">
       {book.authors.length ? book.authors.join(" / ") : "作者不详"}
       {#if book.publisher}<span>·</span>{book.publisher}{/if}
-      {#if book.publishedAt}<span>·</span>{book.publishedAt}{/if}
+      {#if book.publicationDate}<span>·</span>{book.publicationDate}{/if}
     </p>
     {#if book.summary}<p class="summary">{book.summary}</p>{/if}
-    <div class="meta">
-      <span
-        >{book.source === "douban"
-          ? "豆瓣"
-          : book.source === "clcn"
-            ? "首图"
-            : "国图"}</span
+    {#if book.documentType || book.classmark || book.detailUrl}<div
+        class="meta"
       >
-      {#if book.isbn}<span>ISBN {book.isbn}</span>{/if}
-      {#if book.detailUrl}<a
-          href={book.detailUrl}
-          target="_blank"
-          rel="noreferrer">查看详情 ↗</a
-        >{/if}
-    </div>
+        {#if book.documentType}<span>{book.documentType}</span>{/if}
+        {#if book.classmark}<span>{book.classmark}</span>{/if}
+        {#if book.detailUrl}<a
+            href={book.detailUrl}
+            target="_blank"
+            rel="noreferrer">查看详情 ↗</a
+          >{/if}
+      </div>{/if}
   </div>
 </article>
 
@@ -92,6 +105,13 @@
     font-size: 21px;
     font-weight: 650;
     line-height: 1.35;
+  }
+  .title-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .title-link:hover h2 {
+    color: var(--green);
   }
   .subtitle {
     margin: 3px 0 0;

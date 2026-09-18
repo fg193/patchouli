@@ -33,6 +33,7 @@ pub async fn search(
     page: u32,
     page_size: u32,
 ) -> Result<SearchResponse, ApiError> {
+    // 从 0 开始的翻页偏移量
     let start = (page - 1) * page_size;
     let response = client
         .post(ENDPOINT)
@@ -55,21 +56,26 @@ pub async fn search(
     let items = books
         .iter()
         .enumerate()
-        .map(|(index, book)| {
-            let id = optional_string(book, &["id", "isbn13", "isbn10"])
-                .unwrap_or_else(|| format!("douban-{start}-{index}"));
+        .filter_map(|(_, book)| {
+            let id = optional_string(book, &["id"])?;
             let rating = book
                 .get("rating")
                 .and_then(|rating| rating.get("average"))
                 .and_then(|average| average.as_f64().or_else(|| average.as_str()?.parse().ok()))
                 .filter(|average| *average != 0.0);
-            BookResult {
+            let subtitles = optional_string(book, &["alt_title", "subtitle", "origin_title"])
+                .into_iter()
+                .collect();
+            Some(BookResult {
+                provider_id: ProviderId::Douban,
                 id,
-                title: optional_string(book, &["title"]).unwrap_or_else(|| "未命名书目".into()),
-                subtitle: optional_string(book, &["alt_title", "subtitle"]),
+                title: optional_string(book, &["title"]).unwrap_or_default(),
+                subtitles,
+                document_type: None,
+                classmark: None,
                 authors: string_list(book, &["author", "translator"]),
                 publisher: optional_string(book, &["publisher"]),
-                published_at: optional_string(book, &["pubdate"]),
+                publication_date: optional_string(book, &["pubdate"]),
                 cover_url: optional_string(book, &["image"]).or_else(|| {
                     book.pointer("/images/large")
                         .and_then(Value::as_str)
@@ -79,8 +85,7 @@ pub async fn search(
                 summary: optional_string(book, &["summary"]),
                 rating,
                 detail_url: optional_string(book, &["alt"]),
-                source: "douban",
-            }
+            })
         })
         .collect();
     Ok(SearchResponse {

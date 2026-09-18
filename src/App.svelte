@@ -126,13 +126,13 @@
           <h2>这一页暂时翻不开</h2>
           {#if businessCode !== undefined}<p>错误码：{businessCode}</p>{/if}
           <p>错误消息：{errorMessage || error}</p>
-          <button type="button" onclick={search}>重新检索</button>
+          <button type="button">去 GitHub 反馈</button>
         </div>
       {:else if results.length === 0}
         <div class="status">
           <span class="empty-glyph">○</span>
-          <h2>没有找到相关书目</h2>
-          <p>试试更短的书名、作者名，或切换另一处馆藏。</p>
+          <h2>未找到相关文献</h2>
+          <p>试试更短的书名，或换个检索引擎？</p>
         </div>
       {:else}
         <div class="result-heading">
@@ -144,7 +144,7 @@
           <small>按相关度排序</small>
         </div>
         <div class="book-list">
-          {#each results as book, index (book.source + book.id)}<BookCard
+          {#each results as book, index (book.providerId + book.id)}<BookCard
               {book}
               {index}
             />{/each}

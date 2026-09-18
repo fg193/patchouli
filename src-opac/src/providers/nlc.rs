@@ -2,9 +2,10 @@ use serde_json::{json, Map, Value};
 
 use super::super::{
     error::ApiError,
-    models::{optional_string, string_list, BookResult, SearchResponse},
+    models::{optional_string, split_catalog_title, string_list, BookResult, SearchResponse},
 };
 use super::super::{Provider, ProviderId};
+use super::cover_url;
 
 pub struct NlcProvider;
 
@@ -25,6 +26,16 @@ impl Provider for NlcProvider {
 }
 
 const ENDPOINT: &str = "https://m.nlc.cn/nlc-api/api/nlc/alephSearch/params";
+
+fn isbn(value: &Value) -> Option<String> {
+    value
+        .get("isbn")
+        .and_then(Value::as_array)
+        .and_then(|values| values.iter().find_map(Value::as_str))
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+}
 
 /// Mirrors the National Library SPA's unusual canonicalizer: object keys are
 /// sorted recursively and arrays become objects with numeric string keys.
@@ -74,6 +85,12 @@ pub async fn search(
     page_size: u32,
 ) -> Result<SearchResponse, ApiError> {
     let body = json!({
+        // pageNum: 页码（字符串）
+        // pageSize: 分页大小（字符串）
+        // base: 目录库标识，当前使用 NLC01S
+        // adjacent: Y=启用相邻匹配，N=关闭相邻匹配
+        // params.key: 查询词
+        // params.code: WRD=词语检索
         "pageNum": page.to_string(),
         "pageSize": page_size.to_string(),
         "base": "NLC01S",
@@ -110,29 +127,34 @@ pub async fn search(
         .ok_or_else(|| ApiError::invalid_response(&payload))?;
     let items = books
         .iter()
-        .enumerate()
-        .map(|(index, book)| {
-            let id = optional_string(book, &["docNumber", "id", "code"])
-                .unwrap_or_else(|| format!("nlc-{page}-{index}"));
+        .filter_map(|book| {
+            let id = optional_string(book, &["docNumber"])?;
             let base = optional_string(book, &["base"]).unwrap_or_else(|| "NLC01S".into());
-            let doc_number = optional_string(book, &["docNumber"]);
-            let detail_url = doc_number.map(|number| {
-                format!("https://m.nlc.cn/#/bookDetail?base={base}&docNumber={number}")
-            });
-            BookResult {
+            let detail_url = Some(format!(
+                "https://m.nlc.cn/#/bookDetail?base={base}&docNumber={id}"
+            ));
+            let (title, document_type, subtitles, authors) = split_catalog_title(
+                &optional_string(book, &["title"]).unwrap_or_default(),
+                optional_string(book, &["type"]),
+                string_list(book, &["author"]),
+            );
+            let isbn = isbn(book);
+            Some(BookResult {
+                provider_id: ProviderId::Nlc,
                 id,
-                title: optional_string(book, &["title"]).unwrap_or_else(|| "未命名书目".into()),
-                subtitle: None,
-                authors: string_list(book, &["author"]),
+                title,
+                subtitles,
+                document_type,
+                classmark: optional_string(book, &["code"]),
+                authors,
                 publisher: optional_string(book, &["publishHouse"]),
-                published_at: optional_string(book, &["publishYear"]),
-                cover_url: optional_string(book, &["cover", "coverUrl"]),
-                isbn: optional_string(book, &["isbn"]),
+                publication_date: optional_string(book, &["publishYear"]),
+                cover_url: cover_url(isbn.as_deref()),
+                isbn,
                 summary: optional_string(book, &["summary"]),
                 rating: None,
                 detail_url,
-                source: "nlc",
-            }
+            })
         })
         .collect();
     Ok(SearchResponse {

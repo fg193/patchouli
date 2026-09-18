@@ -3,14 +3,19 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ApiError {
+    // INVALID_REQUEST: 请求参数无效
     #[error("{message}")]
     InvalidRequest { message: String },
+    // HTTP: 上游服务返回 HTTP 错误状态
     #[error("HTTP {status}")]
     Http { status: u16 },
+    // NETWORK_ERROR: 网络请求失败
     #[error("网络请求失败：{0}")]
     Network(#[from] reqwest::Error),
+    // INVALID_RESPONSE: 上游响应无法解析
     #[error("无法解析查询结果：{response}")]
     InvalidResponse { response: String },
+    // BUSINESS_ERROR: 上游服务返回业务错误码和消息
     #[error("{message}")]
     Business { code: u64, message: String },
 }
