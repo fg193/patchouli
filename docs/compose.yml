@@ -1,0 +1,31 @@
+services:
+  redroid:
+    image: redroid/redroid:12.0.0_64only-latest
+    container_name: redroid
+    privileged: true
+    stdin_open: true
+    tty: true
+    ports:
+      - "5555:5555"
+    volumes:
+      - /dev/binderfs:/dev/binderfs
+      # - /home/redroid:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          if ! ip route get 1.1.1.1 >/dev/null 2>&1; then
+            ip route show table main | grep -v '^default ' | while read -r route; do
+              ip route replace $$route table local_network || exit 1;
+            done;
+            ip route show table main | grep '^default ' | while read -r route; do
+              ip route replace $$route table local_network || exit 1;
+            done;
+          fi;
+          [ "$$(getprop init.svc.zygote)" = running ] &&
+          [ "$$(getprop sys.boot_completed)" = 1 ]
+      interval: 2s
+      start_interval: 6s
+      timeout: 5s
+      retries: 60
+      start_period: 10s

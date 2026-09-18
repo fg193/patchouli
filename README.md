@@ -42,7 +42,15 @@ npm install
 npx tauri dev
 ```
 
-构建 Tauri 应用，以 Android 平台为例：
+在移动端热部署 Tauri 应用进行开发和预览，以 Android 平台为例：
+
+```bash
+npx tauri android init
+adb reverse tcp:1420 tcp:1420
+npx tauri android dev
+```
+
+构建 Tauri 应用，以 Android 平台为例，更详细的测试流程可参考 [docs/redroid-testing.md](docs/redroid-testing.md)：
 
 ```bash
 npx tauri android init
