@@ -65,15 +65,14 @@
   ><title
     >{hasSearched
       ? `${query} · ${selectedProvider.shortName}`
-      : "页间 · 图书检索"}</title
+      : "Patchouli · 图书检索"}</title
   ></svelte:head
 >
 
 <main class:searched={hasSearched}>
   <header>
-    <a class="brand" href="/" aria-label="页间首页">
-      <span class="brand-mark">頁</span>
-      <span>页间</span>
+    <a class="brand" href="/" aria-label="Patchouli 首页">
+      <span>Patchouli</span>
     </a>
   </header>
 
@@ -154,7 +153,5 @@
     </section>
   {/if}
 
-  <footer>
-    <span>页间 · PATCHOULI</span><span>跨馆检索，不止于搜索</span>
-  </footer>
+  <footer><span>Patchouli</span><span>跨馆检索，不止于搜索</span></footer>
 </main>

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "页间",
+  "productName": "Patchouli",
   "version": "0.1.0",
-  "identifier": "cn.patchouli.books",
+  "identifier": "io.github.fg193.patchouli",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "页间 · 图书检索",
+        "title": "Patchouli · 图书检索",
         "width": 1120,
         "height": 780,
         "minWidth": 720,

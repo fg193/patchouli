@@ -1,4 +1,4 @@
-# 页间（Patchouli）
+# Patchouli
 
 跨图书馆文献检索应用
 

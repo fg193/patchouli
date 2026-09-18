@@ -73,18 +73,6 @@ header {
   text-decoration: none;
 }
 
-.brand-mark {
-  width: 34px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #697069;
-  border-radius: 2px 7px 7px 2px;
-  color: var(--green);
-  font-size: 15px;
-  box-shadow: 2px 2px 0 rgba(49, 74, 58, 0.12);
-}
-
 header p {
   color: #929287;
   font-family: var(--serif);
