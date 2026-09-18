@@ -1,6 +1,7 @@
 <script lang="ts">
   import BookCard from "./lib/components/BookCard.svelte";
   import EngineSelect from "./lib/components/EngineSelect.svelte";
+  import LoadingIndicator from "./lib/components/LoadingIndicator.svelte";
   import { tauriSearchApi } from "./lib/api/client";
   import { getProvider } from "./lib/api/providers";
   import type { ApiFailure, BookResult, ProviderId } from "./lib/api/contracts";
@@ -10,20 +11,65 @@
   let query = $state("");
   let results = $state<BookResult[]>([]);
   let total = $state(0);
+  let page = $state(1);
+  let pageSize = 20;
   let loading = $state(false);
+  let loadingMore = $state(false);
+  let loadMoreError = $state("");
+  let loadMoreSentinel: HTMLDivElement | undefined = $state();
   let error = $state("");
   let businessCode = $state<number | undefined>(undefined);
   let errorMessage = $state("");
   let hasSearched = $state(false);
+  let headerVisible = $state(true);
 
   const selectedProvider = $derived(getProvider(provider));
   const resultSource = $derived(getProvider(resultProvider));
+  const hasMore = $derived(results.length < total);
+
+  $effect(() => {
+    let lastScrollY = window.scrollY;
+    let frame: number | undefined;
+
+    const updateHeader = () => {
+      frame = undefined;
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+      if (currentScrollY <= 8 || delta < 0) headerVisible = true;
+      else if (delta > 0) headerVisible = false;
+      lastScrollY = currentScrollY;
+    };
+    const onScroll = () => {
+      if (frame === undefined) frame = requestAnimationFrame(updateHeader);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
+  });
+
+  $effect(() => {
+    if (!loadMoreSentinel || !hasMore || loading || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadNextPage();
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(loadMoreSentinel);
+    return () => observer.disconnect();
+  });
 
   async function search() {
     const normalized = query.trim();
     if (!normalized || loading) return;
 
     loading = true;
+    page = 1;
+    loadMoreError = "";
     error = "";
     businessCode = undefined;
     errorMessage = "";
@@ -59,6 +105,34 @@
       loading = false;
     }
   }
+
+  async function loadNextPage() {
+    const normalized = query.trim();
+    if (!normalized || loading || loadingMore || !hasMore) return;
+
+    loadingMore = true;
+    loadMoreError = "";
+    const nextPage = page + 1;
+    try {
+      const response = await tauriSearchApi.search({
+        provider: resultProvider,
+        query: normalized,
+        page: nextPage,
+        pageSize,
+      });
+      results = [...results, ...response.items];
+      total = response.total;
+      page = response.page;
+    } catch (cause) {
+      const failure = cause as Partial<ApiFailure> | string;
+      loadMoreError =
+        typeof failure === "string"
+          ? failure
+          : (failure.message ?? "下一页暂时加载失败，请稍后重试。 ");
+    } finally {
+      loadingMore = false;
+    }
+  }
 </script>
 
 <svelte:head
@@ -70,7 +144,7 @@
 >
 
 <main class:searched={hasSearched}>
-  <header>
+  <header class:hidden={!headerVisible}>
     <a class="brand" href="/" aria-label="Patchouli 首页">
       <span>Patchouli</span>
     </a>
@@ -117,8 +191,7 @@
     <section class="results" aria-live="polite">
       {#if loading}
         <div class="status">
-          <span class="large-spinner"></span>
-          <p>少女祈祷中…</p>
+          <LoadingIndicator />
         </div>
       {:else if error}
         <div class="status error-state">
@@ -148,6 +221,16 @@
               {book}
               {index}
             />{/each}
+        </div>
+        <div bind:this={loadMoreSentinel} class="load-more" aria-live="polite">
+          {#if loadingMore}
+            <LoadingIndicator />
+          {:else if loadMoreError}
+            <span>{loadMoreError}</span>
+            <button type="button" onclick={loadNextPage}>重试</button>
+          {:else if !hasMore}
+            <span>已经到底了</span>
+          {/if}
         </div>
       {/if}
     </section>
