@@ -16,6 +16,7 @@ tauri-build = { version = "2", features = [] }
 patchouli-opac-api = { path = "../src-opac" }
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 tauri = { version = "2", features = [] }
+tauri-plugin-system-ui = { path = "../plugins/system-ui" }
 
 [profile.release]
 strip = "symbols"

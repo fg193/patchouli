@@ -14,6 +14,7 @@ pub fn run() {
     let _ = rustls::crypto::ring::default_provider().install_default();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_system_ui::init())
         .invoke_handler(tauri::generate_handler![search_books])
         .run(tauri::generate_context!())
         .expect("error while running Patchouli");
