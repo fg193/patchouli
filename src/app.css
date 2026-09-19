@@ -10,6 +10,8 @@
   --paper-dark: #ebe7dd;
   --line: #dcd7cb;
   --serif: "Noto Serif SC", "Songti SC", STSong, serif;
+  --system-safe-area-top: 0px;
+  --header-safe-area-top: max(0px, calc(var(--system-safe-area-top) - 4px));
 }
 
 * {
@@ -61,8 +63,8 @@ header {
   z-index: 10;
   width: 100vw;
   margin-left: calc((100% - 100vw) / 2);
-  padding: 0 max(24px, calc((100vw - 1080px) / 2));
-  height: 88px;
+  padding: var(--system-safe-area-top) max(24px, calc((100vw - 1080px) / 2)) 0;
+  height: calc(88px + var(--system-safe-area-top));
   display: flex;
   align-items: center;
   gap: 16px;
@@ -451,8 +453,8 @@ h1 em {
   }
 
   header {
-    height: 72px;
-    padding: 0 8px;
+    height: calc(64px + var(--header-safe-area-top));
+    padding: var(--header-safe-area-top) 8px 0;
     gap: 4px;
   }
 

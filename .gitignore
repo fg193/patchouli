@@ -4,6 +4,11 @@
 .vscode/
 dist/
 node_modules/
-src-tauri/gen/
+src-tauri/gen/**
+!src-tauri/gen/**/
+!src-tauri/gen/android/app/src/main/java/io/github/fg193/patchouli/MainActivity.kt
+!src-tauri/gen/android/app/src/main/res/values/colors.xml
+!src-tauri/gen/android/app/src/main/res/values/themes.xml
+!src-tauri/gen/android/app/src/main/res/values-night/themes.xml
 src-tauri/icons/
 target/
