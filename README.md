@@ -62,3 +62,15 @@ npx tauri android build -- --apk --split-per-abi --target aarch64
 ```bash
 npm run format
 ```
+
+
+## 致谢
+
+- [上海 Alice 幻乐团](http://www16.big.or.jp/~zun/)，[项目命名参考](https://thwiki.cc/Patchouli)
+- [Stellarium](https://stellarium-web.org)，[主图标设计参考](https://github.com/Stellarium/stellarium/blob/master/data/stellarium.icns)
+- [汪磊同学](https://github.com/zce)，[豆瓣 API 文档](https://fg193.github.io/douban-api-docs/docs/book.html)
+- [Paseo](https://paseo.sh)，主要工作在该开发环境中完成
+- Oracle Cloud, 大部分开发及测试在[龟壳免费安培服务器](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)中进行
+- Livid，部分代码开发工作使用了 [V2EX AI Chat 免费提供的 DeepSeek-V4-Flash 0731 模型](https://www.v2ex.com/t/1231448)
+- [SnowNF](https://github.com/SnowNF/ndk-aarch64-linux) 及 [zhuwanghong](https://github.com/zhuwanhong/android-sdk-linux-arm64)，提供了在 aarch64 运行 NDK 的文档
+- [Lucide 图标包](https://lucide.dev/icons/)，以及[成百上千的其他开源依赖](https://github.com/fg193/patchouli/network/dependencies)
